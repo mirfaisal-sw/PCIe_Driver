@@ -1,0 +1,31 @@
+PCIe driver steps: -
+========================
+
+Once the driver knows about a PCI device and takes ownership, the driver generally needs
+to perform the following initialization:
+
+	- Enable the device
+	- Request MMIO/IOP resources
+	- Set the DMA mask size (for both coherent and streaming DMA)
+	- Allocate and initialize shared control data (pci_allocate_coherent())
+	- Access device configuration space	
+	- Register IRQ handler (request_irq())
+	- Initialize non-PCI (i.e. LAN/SCSI/etc parts of the chip)
+	- Enable DMA/processing engines
+
+When done using the device, and perhaps the module needs to be unloaded, the driver needs
+to take the follow steps:
+
+	- Disable the device from generating IRQs
+	- Release the IRQ (free_irq())
+	- Stop all DMA activity
+	- Release DMA buffers (both streaming and coherent)
+	- Unregister from other subsystems (e.g. scsi or netdev)
+	- Release MMIO/IOP resources
+	- Disable the device
+
+Most of these topics are covered in the following sections. For the rest look at LDD3 or <linux/pci.h>.
+
+Reference: -
+--------------
+	https://docs.kernel.org/PCI/pci.html
